@@ -8,7 +8,9 @@ public class Teemo : MonoBehaviour
     [Header("Sprites")]
     [SerializeField] private Sprite teemoNormal;
     [SerializeField] private Sprite teemoAtaque;
-
+    [SerializeField] private Sprite teemoEnemigo1; ///normal
+    [SerializeField] private Sprite teemoEnemigo2; //primer golpe
+    [SerializeField] private Sprite teemoEnemigo3; //muelto
 
     //Variables que se usan para determinar el tiempo de movimiento del sprite.
     private Vector2 startPosition = new Vector2(0f, -2.56f);
@@ -20,8 +22,10 @@ public class Teemo : MonoBehaviour
     private Animator animator;
 
     private bool hittable = true;
-    public enum TeemoType { Standard, Bomb};
-    
+    public enum TeemoType { Standard, HardHat, Hongo};
+    private TeemoType teemoType;
+    private float hardRate = 0.25f;
+    private float hongoRate = 0f;
     private int lives;
     
     private IEnumerator ShowHide(Vector2 start, Vector2 end)
@@ -55,7 +59,38 @@ public class Teemo : MonoBehaviour
 
     private void Start()
     {
+        CreateNext();
         StartCoroutine(ShowHide(startPosition, endPosition));
+    }
+
+    private void CreateNext()
+    {
+        float random = Random.Range(0f, 1f);
+        if(random < hongoRate)
+        {
+            teemoType = TeemoType.Hongo;
+            animator.enabled = true;
+        }
+            else
+        {
+            animator.enabled = false;
+            random = Random.Range (0f, 1f);
+            if (random < hardRate)
+            {
+                teemoType = TeemoType.HardHat;
+                spriteRenderer.sprite = teemoEnemigo1;
+                lives = 2;
+            }
+                else
+            {
+                teemoType = TeemoType.Standard;
+                spriteRenderer.sprite = teemoNormal;
+                lives = 1;
+            }
+        }
+
+        hittable = true;
+
     }
 
     private void Awake()
@@ -67,11 +102,36 @@ public class Teemo : MonoBehaviour
     {
         if(hittable)
         {
+            switch (teemoType)
+            {
+                case TeemoType.Standard:
             spriteRenderer.sprite = teemoAtaque;
             //Detiene la animación
             StopAllCoroutines();
             StartCoroutine(QuickHide());
+
             hittable = false;
+            break;
+
+                case TeemoType.HardHat:
+            if (lives == 2)
+            {
+                spriteRenderer.sprite = teemoEnemigo2;
+                lives--;
+            }
+            else
+                {
+                    spriteRenderer.sprite = teemoEnemigo3;
+                    StopAllCoroutines();
+                    StartCoroutine(QuickHide());
+                    hittable = false;   
+                }
+                break;
+                case TeemoType.Hongo:
+                    break;
+                    default:
+                    break;
+            }
         }
     }
 
