@@ -68,6 +68,7 @@ public class Teemo : MonoBehaviour
         float random = Random.Range(0f, 1f);
         if(random < hongoRate)
         {
+            //Hacer que aparezcan los honguitos
             teemoType = TeemoType.Hongo;
             animator.enabled = true;
         }
