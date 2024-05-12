@@ -12,6 +12,8 @@ public class Teemo : MonoBehaviour
     [SerializeField] private Sprite teemoEnemigo2; //primer golpe
     [SerializeField] private Sprite teemoEnemigo3; //muelto
 
+    [SerializeField] private GameManager gameManager;
+
     //Variables que se usan para determinar el tiempo de movimiento del sprite.
     private Vector2 startPosition = new Vector2(0f, -2.56f);
     private Vector2 endPosition = Vector2.zero;
@@ -34,7 +36,7 @@ public class Teemo : MonoBehaviour
     private int lives;
 
 
-    private void SetLevel(int level)
+   public void SetLevel(int level)
     {
         hongoRate = Mathf.Min(level * 0.025f, 0.25f);
         hardRate = Mathf.Min(level * 0.25f, 1f);
@@ -45,7 +47,12 @@ public class Teemo : MonoBehaviour
 
     }
     
-    private void Activate(int level)
+    public void SetIndex(int Index)
+    {
+        teemoIndex = index;
+    }
+
+     public void Activate(int level)
     {
         SetLevel(level);
         CreateNext();
@@ -53,7 +60,7 @@ public class Teemo : MonoBehaviour
     }
 
 
-    private void Awake()
+    public void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
@@ -66,7 +73,7 @@ public class Teemo : MonoBehaviour
 
     }
 
-    private IEnumerator ShowHide(Vector2 start, Vector2 end)
+     public IEnumerator ShowHide(Vector2 start, Vector2 end)
     {
         transform.localPosition = start;
 
@@ -100,9 +107,15 @@ public class Teemo : MonoBehaviour
         transform.localPosition = start;
         boxCollider2D.offset = boxOffsetHidden;
         boxCollider2D.size = boxSizeHidden;
+
+        if (hittable)
+        {
+            hittable = false;
+            gameManager.Missed(teemoIndex, teemoType != TeemoType.Hongo);
+        }
     }
 
-    private void OnMouseDown()
+     public void OnMouseDown()
     {
         if (hittable)
         {
@@ -132,14 +145,16 @@ public class Teemo : MonoBehaviour
                     }
                     break;
                 case TeemoType.Hongo:
-                    break;
+                 
+                gameManager.GameOver(1);
+                break;
                 default:
-                    break;
+                 break;
             }
         }
     }
 
-    private void CreateNext()
+    public void CreateNext()
     {
         float random = Random.Range(0f, 1f);
         if (random < hongoRate)
@@ -171,7 +186,7 @@ public class Teemo : MonoBehaviour
     }
 
 
-    private IEnumerator QuickHide()
+     public IEnumerator QuickHide()
     {
         yield return new WaitForSeconds(0.25f);
 
@@ -189,4 +204,9 @@ public class Teemo : MonoBehaviour
         boxCollider2D.size = boxSizeHidden;
     }
     
+    public void StopGame()
+    {
+        hittable = false;
+        StopAllCoroutines();
+    }
 }
